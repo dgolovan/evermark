@@ -10,10 +10,9 @@ AngularJS framework is used alongside Bootstrap to organize the application.
 
 The app is not yet finished and so has not been uploaded to Google Chrome store.
 To get it working a config.js file needs to be added with the following contents:
-
+<code>
 var CONFIG = {
-
 	clientId: [YOUR EVERNOTE DEVELOPER CLIENT_ID],
 	clientSecret: [YOUR EVERNOTE DEVELOPER CLIENT_SECRET]
-
 }
+</code>
