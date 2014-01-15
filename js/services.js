@@ -16,6 +16,8 @@ angular.module('emServices', []).provider('Evernote',
     var redirectRe = new RegExp(redirectUri + '[#\?](.*)');
 
     var access_token = null;
+    var notestore_url = null;
+
     var oauth_token_secret = "";
 
     var oaOpt = {
@@ -30,13 +32,24 @@ angular.module('emServices', []).provider('Evernote',
 
       getToken: function(interactive, callback) {
         // In case we already have an access_token cached, simply return it.
-        if (access_token) {
-          callback(null, access_token);
-          return;
-        }
+        chrome.storage.local.get(['em_access_token', 'em_notestore_url'], function(items) {
+          if (items.hasOwnProperty('em_access_token') && items.hasOwnProperty('em_notestore_url')){
+            console.log("We already have a token in storage");
+            console.log(items);
+            access_token = items.em_access_token;
+            notestore_url = items.em_notestore_url;
+            callback(null, access_token, notestore_url);
+            return;
+          }
+          else{
+            console.log("No token found in storage, continuing with OAuth flow");
+            oauth.request({'method': 'GET', 'url': 'https://sandbox.evernote.com/oauth', 'success': oaRequestTokenSuccess, 'failure': oaFailure});
+          }
+        });
+        
 
         //OAuth Step 1: Send request for the "request_token"
-        oauth.request({'method': 'GET', 'url': 'https://sandbox.evernote.com/oauth', 'success': oaRequestTokenSuccess, 'failure': oaFailure});
+        //oauth.request({'method': 'GET', 'url': 'https://sandbox.evernote.com/oauth', 'success': oaRequestTokenSuccess, 'failure': oaFailure});
       
         /**
         * Handle the success for the Step1 when we request the "request token"
@@ -166,7 +179,12 @@ angular.module('emServices', []).provider('Evernote',
         
 
         function setAccessToken(token, noteStoreUrl) {
+          chrome.storage.local.set({'em_access_token': token, 'em_notestore_url': noteStoreUrl}, function() {
+            // Notify that we saved.
+             console.log('Chrome storage: token saved');
+          });
           access_token = token; 
+          notestore_url = noteStoreUrl; 
           console.log('Setting access_token: ', access_token);
           callback(null, access_token, noteStoreUrl);
         }
