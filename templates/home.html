@@ -1,3 +1,7 @@
-<div ng-repeat="note in notes">
-	Note: {{ note }}
+<div class="row">
+	<div class="col-md-2" ng-repeat="note in notes">
+		<h4>{{ note.title }}</h4>
+		<div ng-bind-html="to_trusted(note.content)"></div>
+		<!-- <p>{{note.content}}</p> -->
+	 </div>
  </div>

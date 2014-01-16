@@ -1,7 +1,11 @@
 'use strict';
 
-function MainCtrl($scope, $timeout, Evernote) {
-	// Build the date object
+function MainCtrl($scope, $timeout, Evernote, $sce) {
+	
+	$scope.to_trusted = function(html_code){
+ 	   return $sce.trustAsHtml(html_code);
+    }
+
 	$scope.notes = [];
 
 	
@@ -23,22 +27,17 @@ function MainCtrl($scope, $timeout, Evernote) {
 			spec.includeTitle = true;
 
 	        
+	        var noteGuids = [];
 
-	        
-	        //var notes = [];
-
-	        noteStore.findNotesMetadata(authTokenEvernote, filter, 0, 100, spec, function (noteList){
-	        	// for (note in noteList.notes){
-	        	// 	$scope.notes.push(note.title);
-	        		
-	        	// }
-	        	console.log(noteList.notes);
+	        noteStore.findNotesMetadata(authTokenEvernote, filter, 0, 100, spec, function (noteList){   	
 	        	for(var i = 0, size = noteList.notes.length; i < size ; i++){
-	        		console.log(noteList.notes[i].title);
-	        		$scope.notes.push(noteList.notes[i].title);
+	        		//$scope.notes.push(noteList.notes[i].title);
+	        		noteGuids.push({guid: noteList.notes[i].guid, title: noteList.notes[i].title});
 	        	}
-	        	$scope.$apply(); 
-	        	console.log($scope.notes);
+	        	//$scope.$apply(); 
+	        	//console.log(noteGuids);
+	        	getNotes(authTokenEvernote, noteStore, noteGuids);
+	        	//$scope.$apply(); 
 	        });
 	        
 
@@ -55,5 +54,37 @@ function MainCtrl($scope, $timeout, Evernote) {
 		 //    }
 			// );
       });
+
+	var getNotes = function(authTokenEvernote, noteStore, noteGuids){
+		var parser = new DOMParser();
+		for(var i = 0, size = noteGuids.length; i < size ; i++){
+			var guid = noteGuids[i].guid;
+			
+			noteStore.getNote(authTokenEvernote, guid, true,true,true,true,function(noteRes){
+				var doc = parser.parseFromString(noteRes.content, "application/xml");
+				var title = noteRes.title;
+				var cont = "";	
+				var en = doc.getElementsByTagName("en-note");
+				var oSerializer = new XMLSerializer();
+				var asXML = oSerializer.serializeToString(en.item(0));
+				//console.log(sXML);
+				// var en_kids = en.item(0).childNodes;
+				// for (var i = 0; i < en_kids.length; i++) {
+				// 	var elem = en_kids[i];
+				// 	//cont = cont + elem.outerHTML;
+				// 	console.log(elem.innerHTML);
+				// }
+				//$scope.notes.push({title: title, content: els.item(0).textContent});
+				$scope.notes.push({title: title, content: asXML});
+				//console.log(cont);
+				$scope.$apply(); 
+			});
+
+	        		
+	        		
+		//	console.log(noteGuids);
+		}
+		
+	};
 	
 }
