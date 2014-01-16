@@ -57,25 +57,44 @@ function MainCtrl($scope, $timeout, Evernote, $sce) {
 
 	var getNotes = function(authTokenEvernote, noteStore, noteGuids){
 		var parser = new DOMParser();
+		var serializer = new XMLSerializer();
 		for(var i = 0, size = noteGuids.length; i < size ; i++){
 			var guid = noteGuids[i].guid;
 			
 			noteStore.getNote(authTokenEvernote, guid, true,true,true,true,function(noteRes){
 				var doc = parser.parseFromString(noteRes.content, "application/xml");
-				var title = noteRes.title;
-				var cont = "";	
+
+				//Get the image
+				var img_src = "";
+				var img = doc.getElementsByTagName("img");
+				if(img.length > 0){
+					img = img.item(0);
+					console.log(img.attributes);
+					img_src = img.attributes.src.value; //serializer.serializeToString(img);
+					//img.parentNode.removeChild(img);
+				}
+				//console.log(img_str);
+				
+				//remove the anchor
+				var anc = doc.getElementsByTagName("a");
+				if(anc.length > 0){
+					anc = anc.item(0);
+					anc.parentNode.removeChild(anc);
+				}
+
 				var en = doc.getElementsByTagName("en-note");
-				var oSerializer = new XMLSerializer();
-				var asXML = oSerializer.serializeToString(en.item(0));
-				//console.log(sXML);
-				// var en_kids = en.item(0).childNodes;
-				// for (var i = 0; i < en_kids.length; i++) {
-				// 	var elem = en_kids[i];
-				// 	//cont = cont + elem.outerHTML;
-				// 	console.log(elem.innerHTML);
-				// }
-				//$scope.notes.push({title: title, content: els.item(0).textContent});
-				$scope.notes.push({title: title, content: asXML});
+				en = en.item(0);
+
+				console.log(en);
+
+				var title = noteRes.title;
+				var url = noteRes.attributes.sourceURL;
+				
+				var cont = en.textContent; //serializer.serializeToString(en);	
+				
+				//console.log(noteRes);
+
+				$scope.notes.push({title: title, url: url, img: img_src, content: cont});
 				//console.log(cont);
 				$scope.$apply(); 
 			});
