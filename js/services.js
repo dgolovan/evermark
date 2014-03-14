@@ -1,4 +1,4 @@
-//'use strict';
+'use strict';
 
 angular.module('emServices', []).provider('Evernote', 
   function() {
@@ -7,7 +7,7 @@ angular.module('emServices', []).provider('Evernote',
   this.$get = function($q, $http) {
     var self = this;
 
-    var path = 'https://sandbox.evernote.com/oauth?'
+    var path = 'https://www.evernote.com'
     var clientId = CONFIG.clientId; // 'dgolovan-0288';
     var clientSecret = CONFIG.clientSecret; //'eb3ec59147421122';
     // var redirectUri = 'https://' + chrome.runtime.id +
@@ -43,7 +43,7 @@ angular.module('emServices', []).provider('Evernote',
           }
           else{
             console.log("No token found in storage, continuing with OAuth flow");
-            oauth.request({'method': 'GET', 'url': 'https://sandbox.evernote.com/oauth', 'success': oaRequestTokenSuccess, 'failure': oaFailure});
+            oauth.request({'method': 'GET', 'url': path+'/oauth', 'success': oaRequestTokenSuccess, 'failure': oaFailure});
           }
         });
         
@@ -81,7 +81,7 @@ angular.module('emServices', []).provider('Evernote',
                 //This is done with Google's launchWebAuthFlow since it involves the redirect url, which is handled by google since we're an installed app
                 var options = {
                   'interactive': interactive,
-                  'url': 'https://sandbox.evernote.com/OAuth.action?oauth_token=' + request_token 
+                  'url': path+'/OAuth.action?oauth_token=' + request_token 
                 }
                 
                 chrome.identity.launchWebAuthFlow(options, oaRedirectCallback);
@@ -109,7 +109,7 @@ angular.module('emServices', []).provider('Evernote',
           var got_oauth, verifier = '';
           var matches = redirectUri.match(redirectRe);
           if (matches && matches.length > 1){
-            response_vals = parseRedirectFragment(matches[1]);
+            var response_vals = parseRedirectFragment(matches[1]);
             if (response_vals.hasOwnProperty('oauth_token')){
               got_oauth = response_vals.oauth_token;
             }
@@ -129,7 +129,7 @@ angular.module('emServices', []).provider('Evernote',
             // console.log("Got_Oauth= "+got_oauth);
             // console.log("Oauth_Token_Secret= "+oauth_token_secret);
             
-            oauth.request({'method': 'GET', 'url': 'https://sandbox.evernote.com/oauth', 'success': handleProviderResponse, 'failure': oaFailure});
+            oauth.request({'method': 'GET', 'url': path+'/oauth', 'success': handleProviderResponse, 'failure': oaFailure});
           }
 
           else{
