@@ -8,11 +8,11 @@ angular.module('emServices', []).provider('Evernote',
     var self = this;
 
     var path = 'https://www.evernote.com'
-    var clientId = CONFIG.clientId; // 'dgolovan-0288';
-    var clientSecret = CONFIG.clientSecret; //'eb3ec59147421122';
-    // var redirectUri = 'https://' + chrome.runtime.id +
-    //                     '.chromiumapp.org/provider_cb';
-    var redirectUri = 'https://dhjehcalfiahjkkmfngekcglmliofhif.chromiumapp.org/provider_cb';
+    var clientId = CONFIG.clientId; 
+    var clientSecret = CONFIG.clientSecret; 
+    var redirectUri = 'https://' + chrome.runtime.id +
+                         '.chromiumapp.org/provider_cb';
+    //var redirectUri = 'https://dhjehcalfiahjkkmfngekcglmliofhif.chromiumapp.org/provider_cb';
     var redirectRe = new RegExp(redirectUri + '[#\?](.*)');
 
     var access_token = null;

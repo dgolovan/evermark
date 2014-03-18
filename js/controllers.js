@@ -35,9 +35,11 @@ function MainCtrl($scope, $timeout, Evernote, $sce, $q, $indexedDB) {
 	        var noteGuids = [];
 	        var deferred = $q.defer();
 
+	        //noteStore.findNoteCounts(authTokenEvernote, filter, false, function (result){ console.log(result); } );
+
 	        noteStore.findNotesMetadata(authTokenEvernote, filter, 0,100, spec, function (noteList){   
 	        	if(noteList.notes){
-		        	for(var i = 0, size = noteList.notes.length; i < size ; i++){
+		        	for(var i = 0; i < noteList.notes.length; i++){
 		        		//$scope.notes.push(noteList.notes[i].title);
 		        		noteGuids.push({guid: noteList.notes[i].guid, title: noteList.notes[i].title});
 		        	}
@@ -90,11 +92,11 @@ function MainCtrl($scope, $timeout, Evernote, $sce, $q, $indexedDB) {
 				var bookmarkObj = {guid: guid, title: title, url: url, content: cont};
 				var img_resource = null;
 
-				if(noteRes.resources[0]){
-					img_resource = noteRes.resources[0];
-				}
-				else if(noteRes.resources[1]){
+				if(noteRes.resources && noteRes.resources[1]){
 					img_resource = noteRes.resources[1];
+				}
+				else if(noteRes.resources && noteRes.resources[0]){
+					img_resource = noteRes.resources[0];
 				}
 
 				if(img_resource){
@@ -142,17 +144,6 @@ function MainCtrl($scope, $timeout, Evernote, $sce, $q, $indexedDB) {
 		}
 	};
 
-	// var getImg = function(authTokenEvernote, noteStore, resGuid){
-
-	// 	//userStore.getPublicUserInfo('dgolovan', function(userInfo) {
-	// 	  resUrl = "https://www.evernote.com/shard/s35/res/" + resGuid;
-	// 	  console.log(resUrl);
-	// 	//});
-	// 	// noteStore.getResource(authTokenEvernote, resGuid, true, false, false, false, function(resource){
-	// 	// 	console.log(resource);
-	// 	// });
-	// };
-
 	var getImageFile = function (token, noteGuid, resGuid, callback) {
 		var resUrl = "https://www.evernote.com/shard/s35/res/" + resGuid;
         
@@ -165,16 +156,12 @@ function MainCtrl($scope, $timeout, Evernote, $sce, $q, $indexedDB) {
 
         xhr.onload = function(oEvent) {
 			var blob = xhr.response;
-		  	// console.log("Blob:");
-     //        console.log(blob);
             callback(blob);
 		};
 
         // Send XHR
         var params = "auth="+token;
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-  		//xhr.setRequestHeader("Content-length", params.length);
-		// xhr.setRequestHeader("Connection", "close");
         xhr.send(params);
     };
 

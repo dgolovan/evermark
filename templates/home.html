@@ -1,10 +1,10 @@
 <div class="row">
 	<div class="col-md-3" ng-repeat="note in notes">
-		<h6><a href="{{note.url}}">{{ note.title }}</a></h6>
-		<div style="">
-			<a href="{{note.url}}"><img src="{{note.img}}"  title="{{note.content}}" /></a>
+		<div class="bm-container" style="float:left;">
+			<a href="{{note.url}}" style="float: left; padding-right: 5px;"><img src="{{note.img}}" style="max-width: 16px;" title="{{note.content}}" /></a>
+			<span class="bm-title"><a href="{{note.url}}">{{ note.title }}</a></span>
 		</div>
-		
+		<div style="clear:left;"></div>
 		<!-- <div ng-bind-html="to_trusted(note.content)"></div> -->
 		<!-- <p>{{note.content}}</p> -->
 	 </div>
