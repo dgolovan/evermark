@@ -1,11 +1,17 @@
 <div class="row">
+	<div class="col-md-3">
+	<select class="form-control" ng-model="nbGUID" ng-change="changeNB(nbGUID)">
+		<option ng-repeat="nb in notebooks" value="{{nb.guid}}">{{nb.name}}</option>
+   	</select>
+   	</div>
+</div>
+<div class="row">
+	
 	<div class="col-md-3" ng-repeat="note in notes">
 		<div class="bm-container" style="float:left;">
-			<a href="{{note.url}}" style="float: left; padding-right: 5px;"><img src="{{note.img}}" style="max-width: 16px;" title="{{note.content}}" /></a>
+			<a href="{{note.url}}" style="float: left; padding-right: 5px;"><img src="{{ note.img }}" style="max-width: 16px;" title="{{note.content}}" /></a>
 			<span class="bm-title"><a href="{{note.url}}">{{ note.title }}</a></span>
 		</div>
 		<div style="clear:left;"></div>
-		<!-- <div ng-bind-html="to_trusted(note.content)"></div> -->
-		<!-- <p>{{note.content}}</p> -->
 	 </div>
  </div>
