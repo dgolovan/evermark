@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('EverMark', ['ngRoute', 'EvernoteModule', 'IdbModule'])
-.config(function($routeProvider, evernoteProviderProvider) {
+.config(function($routeProvider, evernoteProviderProvider, $compileProvider) {
   // evernoteProviderProvider.setClientParams(CONFIG); 
   
   $routeProvider
@@ -15,6 +15,8 @@ angular.module('EverMark', ['ngRoute', 'EvernoteModule', 'IdbModule'])
     })
     .otherwise({redirectTo: '/'});
 
+    //$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension):/);
+    $compileProvider.imgSrcSanitizationWhitelist(/^\s*(data|chrome-extension):/);
     
 
     // $indexedDBProvider

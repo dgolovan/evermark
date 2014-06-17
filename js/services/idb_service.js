@@ -6,7 +6,8 @@ function($q, evernoteProvider){
   var service = {};
   var active_notebook;
 
-  var updatecnt = 0;
+  var nb_updatecnt = localStorage.getItem('nb_updatecnt') || 0;
+  var bm_updatecnt = localStorage.getItem('bm_updatecnt') || 0;
   
   //Open the IDB Stores
   var nbstore_def = $q.defer();
@@ -31,6 +32,17 @@ function($q, evernoteProvider){
 	function(){ bmstore_def.resolve(this); },
   function(){ bmstore_def.reject("Could not open bmStore"); });
 
+  var clearStore = function(store){
+    var done_def = $q.defer();
+
+    store.clear(
+      function(){ done_def.resolve(true); },
+      function(){ done_def.reject("Could not clear IDBStore"); }
+    );
+
+    return done_def.promise;
+  };
+
 
   var syncNotebooks = function(){
     var done_def = $q.defer();
@@ -38,35 +50,32 @@ function($q, evernoteProvider){
     evernoteProvider.getUpdateCount().then(
     //$q.all([new_updatecnt_prom, updatecnt_prom]).then(
     function(new_updatecnt){
-      console.log("Comparing");
       //If there is no change in update count, simply resolve the main promise
-      if( new_updatecnt == updatecnt){ 
+      if( new_updatecnt == nb_updatecnt){ 
         done_def.resolve();
       }
       //Otherwise we need to sync
       else{
-        console.log("Update counts different - syncing");
-        updatecnt = new_updatecnt;
-        var clear_def = $q.defer();
-        nbstore_def.promise.then(function(){
-          nbStore.clear(
-            function(){ clear_def.resolve(true); },
-            function(){ clear_def.reject("Could not clear nbStore before sync"); }
-          );
+        evernoteProvider.getNotebooks().then(
+        function(notebooks){
+          nbstore_def.promise.then(
+          function(){
+            clearStore(nbStore).then(
+            function(){
+              nbStore.putBatch(notebooks, 
+                function(suc){ 
+                  nb_updatecnt = new_updatecnt;
+                  localStorage.setItem('nb_updatecnt', nb_updatecnt);
+                  done_def.resolve(suc); 
+                },
+                function(){ done_def.reject("Could not complete nbStore.putBatch()during syncNotebooks"); }
+              );
+            });
+          });
+        },
+        function(){
+          done_def.reject("Could not get the Notebooks through evernoteProvider");
         });
-
-        var getnb_prom = evernoteProvider.getNotebooks();
-        
-        $q.all([clear_def.promise, getnb_prom]).then(
-          function(arr){
-            console.log(arr[1]);
-            nbStore.putBatch(arr[1], 
-              function(suc){ done_def.resolve(suc); },
-              function(){ done_def.reject("Could not complete nbStore.putBatch() during syncNotebooks"); }
-            );
-          },
-          function(){console.log("I failed miserably");}
-        );
       }
     });
     return done_def.promise;
@@ -74,37 +83,35 @@ function($q, evernoteProvider){
 
   var syncNotes = function(nb_guid){
     var done_def = $q.defer();
-
+    
     evernoteProvider.getUpdateCount().then(
     function(new_updatecnt){
-      
       //If there is no change in update count, simply resolve the main promise
-      if( new_updatecnt == updatecnt){ 
+      if( new_updatecnt == bm_updatecnt ){ 
         done_def.resolve();
       }
       //Otherwise we need to sync
       else{
-
-        updatecnt = new_updatecnt;
-        var clear_def = $q.defer();
-        bmstore_def.promise.then(function(){
-          bmStore.clear(
-            function(){ clear_def.resolve(true); },
-            function(){ clear_def.reject("Could not clear bmStore before sync"); }
-          );
+        evernoteProvider.getNotes(nb_guid).then(
+        function(notes){
+          bmstore_def.promise.then(
+          function(){
+            clearStore(bmStore).then(
+            function(){
+              bmStore.putBatch(notes, 
+                function(suc){ 
+                  bm_updatecnt = new_updatecnt;
+                  localStorage.setItem('bm_updatecnt', bm_updatecnt);
+                  done_def.resolve(suc); 
+                },
+                function(){ done_def.reject("Could not complete bmStore.putBatch()during syncNotes"); }
+              );
+            });
+          });
+        },
+        function(){
+          done_def.reject("Could not get the Notes through evernoteProvider");
         });
-
-        var getbm_prom = evernoteProvider.getNotes(nb_guid);
-        
-        $q.all([clear_def.promise, getbm_prom]).then(
-          function(arr){
-            bmStore.putBatch(arr[1], 
-              function(suc){ done_def.resolve(suc); },
-              function(){ done_def.reject("Could not complete bmStore.putBatch() during syncNotes"); }
-            );
-          },
-          function(){console.log("I failed miserably");}
-        );
 
       }
     });
@@ -128,13 +135,10 @@ function($q, evernoteProvider){
 
   service.getNotes = function(nb_guid){
     var done_def = $q.defer();
-
     $q.all([bmstore_def.promise, syncNotes(nb_guid)]).then(
     function(){
-    //bmstore_def.promise.then(function(bmStore){
       bmStore.query(
         function(res){ 
-          console.log(res); 
           done_def.resolve(res);
         }, 
         {index: "nb_guid"} 

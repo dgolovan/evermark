@@ -218,10 +218,9 @@ function() {
       
       have_token.promise.then(
       function(){
-        console.log("GET NOTE");
-        noteStore.getNote(access_token, noteGuid, true,true,false,false,
+        noteStore.getNote(access_token, noteGuid.guid, true,true,false,false,
         function(noteRes){
-          console.log(noteRes);
+          // console.log(noteRes);
           var parser = new DOMParser();
           var serializer = new XMLSerializer();
           var doc = parser.parseFromString(noteRes.content, "application/xml");
@@ -238,39 +237,37 @@ function() {
           var img_src = "";
           var cont = en.textContent;
 
-          var bookmarkObj = {guid: guid, nb_guid: nb_guid, title: title, url: url, content: cont};
+          var bookmarkObj = {guid: noteGuid.guid, nb_guid: nb_guid, title: title, url: url, content: cont, img: "default_bm.png"};
           var img_resource = null;
 
-          if(noteRes.resources && noteRes.resources[1]){
-            img_resource = noteRes.resources[1];
-          }
-          else if(noteRes.resources && noteRes.resources[0]){
+          if(noteRes.resources && noteRes.resources[0]){
             img_resource = noteRes.resources[0];
           }
-
+          else if(noteRes.resources && noteRes.resources[1]){
+            img_resource = noteRes.resources[1];
+          }
+          console.log(title);
+          console.log(noteRes.resources);
           if(img_resource){
             var resGuid = img_resource.guid;
             img_src = "https://www.evernote.com/shard/s35/res/" + resGuid;
             //console.log('IMG_SOURCE: '+img_src);
             var URL = window.URL || window.webkitURL;
-            getImageFile(authTokenEvernote, guid, img_resource.guid).then(
+            getImageFile(authTokenEvernote, noteGuid.guid, img_resource.guid).then(
             function(blob){
-              //localStorage.setItem(guid, JSON.stringify(blob));
-              //bookmarkObj.img = JSON.stringify(blob);
               var fileReader = new FileReader();
               fileReader.onload = function (evt) {
                 // Read out file contents as a Data URL
                 var result = evt.target.result;
                 // Set image src to Data URL
                 bookmarkObj.img = result;
-                // bmStore.put(bookmarkObj);
 
                 // Store Data URL in localStorage
-                try {
-                    localStorage.setItem(guid, result);
+                try{
+                  localStorage.setItem(noteGuid.guid, result);
                 }
-                catch (e) {
-                    console.log("Storage failed: " + e);
+                catch(e){
+                  console.log("Storage failed: " + e);
                 }
                 done_def.resolve(bookmarkObj)
               };
@@ -278,7 +275,7 @@ function() {
             });
           }
           else{
-            done_def.resolve()
+            done_def.resolve(bookmarkObj)
           }
 
         });
@@ -325,7 +322,7 @@ function() {
         return done_def.promise;
       },
 
-      getNotebooks: function(){
+      getNotebooksMock: function(){
         var def = $q.defer();
         var notebook_array = [
         {guid: "c307a40f-6175-4529-8898-6de4695671ee", name: "Bookmarks"},
@@ -337,7 +334,7 @@ function() {
         return def.promise;
       },
 
-      getNotebooksOFF: function(){
+      getNotebooks: function(){
         var def = $q.defer();
         getToken().then(
         function(precious){
@@ -345,7 +342,7 @@ function() {
           var noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport);
           var noteStore = new NoteStoreClient(noteStoreProtocol);
           var notebook_array = [];
-          noteStore.listNotebooks(precious['em_access_token'], function (notebooks) {
+          noteStore.listNotebooks(precious['em_access_token'], function (notebooks){
             for(var i=0; i < notebooks.length; i++){
               var nbObject = {'guid': notebooks[i].guid, 'name': notebooks[i].name};
               notebook_array.push(nbObject);
@@ -359,14 +356,14 @@ function() {
         return def.promise;
       },
 
-      getNotes: function(nbGUID){
+      getNotesMock: function(nbGUID){
         var done_def = $q.defer();
         var notes_array = [
         {guid: "c307a40f-6175-4529-8898-6de4695671ea", nb_guid: "c307a40f-6175-4529-8898-6de4695671ee", title: "Bookmark 1", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"},
         {guid: "c307a40f-6175-4529-8898-6de4695671eb", nb_guid: "c307a40f-6175-4529-8898-6de4695671ee", title: "Bookmark 2", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"},
         {guid: "c307a40f-6175-4529-8898-6de4695671ec", nb_guid: "c307a40f-6175-4529-8898-6de4695671ee", title: "Bookmark 3", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"},
-        {guid: "c307a40f-6175-4529-8898-6de4695671ed", nb_guid: "c307a40f-6175-4529-8898-6de4695671ee", title: "Bookmark 4", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"},
-        {guid: "c307a40f-6175-4529-8898-6de4695671ee", nb_guid: "c307a40f-6175-4529-8898-6de4695671ee", title: "Bookmark 5", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"}
+        {guid: "c307a40f-6175-4529-8898-6de4695671ed", nb_guid: "c307a40f-6175-4529-8898-6de4695671ef", title: "Bookmark 4", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"},
+        {guid: "c307a40f-6175-4529-8898-6de4695671ee", nb_guid: "c307a40f-6175-4529-8898-6de4695671ef", title: "Bookmark 5", url: "www.denisgolovan.com", content: "Denis Golovan is the best Full-Stack Developer"}
         ];
 
         done_def.resolve(notes_array);
@@ -374,7 +371,7 @@ function() {
         return done_def.promise;
       },
 
-			getNotesOFF: function(nbGUID){
+			getNotes: function(nbGUID){
 				var done_def = $q.defer();
         
         var noteguid_def = $q.defer();
@@ -415,7 +412,7 @@ function() {
           $q.all(promise_array).then(function(){ done_def.resolve(notes_array); });
         });
 
-        return done_def;
+        return done_def.promise;
 			}
 		}
 	};
