@@ -5,9 +5,23 @@ function MainCtrl($scope, $timeout, $sce, $q, evernoteProvider, idbFactory) {
     return $sce.trustAsHtml(html_code);
   }
 
-  $scope.notebooks = []; 
   $scope.notes = [];
   $scope.nbGUID = localStorage.getItem('nbGUID') || "";   
+
+  var getNotes = function(nbGUID){
+    idbFactory.getNotes(nbGUID).then(
+    function(nts){
+      $scope.notes = nts;
+    },
+    function(){console.log("smth went wrong"); });
+  };
+  
+  getNotes($scope.nbGUID);
+}
+
+function SettingsCtrl($scope, idbFactory) {
+  $scope.notebooks = []; 
+  $scope.nbGUID = localStorage.getItem('nbGUID') || "";  
 
   $scope.changeNB = function(guid){
     $scope.nbGUID = guid;
@@ -21,16 +35,6 @@ function MainCtrl($scope, $timeout, $sce, $q, evernoteProvider, idbFactory) {
       $scope.notebooks = nbs;
     });
   };
-  updateNotebooks();
-  // evernoteProvider.getUpdateCount().then(function(cnt){ console.log(cnt);});
 
-  var getNotes = function(nbGUID){
-    idbFactory.getNotes(nbGUID).then(
-    function(nts){
-      $scope.notes = nts;
-    },
-    function(){console.log("smth went wrong"); });
-  };
-  
-  getNotes($scope.nbGUID);
+  updateNotebooks();
 }

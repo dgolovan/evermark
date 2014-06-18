@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Evermark",
   "description": "A Chrome app that displays your Evernote Bookmarks",
-  "version": "0.1",
+  "version": "0.2",
   "permissions": [
   	"identity",
     "unlimitedStorage",
@@ -10,10 +10,11 @@
     "https://www.evernote.com/"  
   ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkHdCZ+jsz4MIEkGiKI9jlLCFWIa5TwpRMTCVll/6qwb/m+put5OcocgALaluyJyDuwtjoCa1Rx0dZcmvcq9sNbyn+AoHeS/aI716H7zRoxPKFE6k6YMCSNmkNo2gVQh2ekvOsctVkT8k//uQnx2OfTal0wbT/hOSJMMvanalCBzSK8pUQEZoq41qWSDGjmQms40psZEH7i87xLsJIcTOoedUQwVCgWmGXVx/doRHKt/2w5WMHhDhNxRd+VFtpo7TKgEX8fC99vAJGzgWGpzSqZrPX75lNO4gtLRO38z81aqKOpF7HzvyuLu0mfXbEsikcdrwcuEc86SPqLxFQpr7twIDAQAB",
+  "background": {
+    "scripts": ["js/vendor/angular.min.js"]
+  },
   "content_security_policy": "script-src 'self'; object-src 'self'",
   "chrome_url_overrides" : {
     "newtab": "tab.html"
-  },
-  "options_page": "templates/settings.html"
-
+  }
 }

@@ -1,7 +1,11 @@
-<div ng-app="EverMark" ng-csp>
-<div class="row" ng-controller="SettingsCtrl">
+<div class="row">
+  <div class="col-md-3">
+    <a href="#/" class="fa fa-home"></a>
+  </div>
+</div>
+<div class="row">
 	<div class="col-md-3" >
-		my settings screen {{ lala }}
+		<select class="form-control" ng-model="nbGUID" ng-change="changeNB(nbGUID)" ng-options="nb.guid as nb.name for nb in notebooks">
+    </select>
 	 </div>
- </div>
- </div>
+</div>
